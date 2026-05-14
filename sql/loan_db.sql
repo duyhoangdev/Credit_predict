@@ -1,14 +1,30 @@
 USE Loan_Approval_DW;
 GO
 
--- 1. Tạo các Schema theo chuẩn
-CREATE SCHEMA stg;
-GO
-CREATE SCHEMA dw;
+-- Xóa các bảng cũ nếu đã tồn tại để tránh lỗi "already exists"
+DROP TABLE IF EXISTS dw.Fact_Loan;
+DROP TABLE IF EXISTS dw.Dim_Borrower;
+DROP TABLE IF EXISTS dw.Dim_Loan_Info;
 GO
 
--- Chuyển bảng vừa import vào schema stg (Giả định bạn đã import data gốc vào dbo.Loan_Raw)
-ALTER SCHEMA stg TRANSFER dbo.Loan_Raw;
+-- 1. Tạo các Schema theo chuẩn (nếu chưa có)
+IF NOT EXISTS (SELECT * FROM sys.schemas WHERE name = 'stg')
+BEGIN
+    EXEC('CREATE SCHEMA [stg]');
+END
+GO
+
+IF NOT EXISTS (SELECT * FROM sys.schemas WHERE name = 'dw')
+BEGIN
+    EXEC('CREATE SCHEMA [dw]');
+END
+GO
+
+-- Chuyển bảng vừa import từ dbo sang stg (NẾU BẢNG ĐANG Ở DBO)
+IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[Loan_Raw]') AND type in (N'U'))
+BEGIN
+    ALTER SCHEMA stg TRANSFER dbo.Loan_Raw;
+END
 GO
 
 -- =========================================================
@@ -47,7 +63,7 @@ CREATE TABLE dw.Fact_Loan (
     loan_amnt FLOAT,
     int_rate FLOAT,
     installment FLOAT,
-    loan_status_raw NVARCHAR(50), -- Trạng thái gốc (vd: Fully Paid, Charged Off) để PowerBI dễ đọc
+    loan_status_raw NVARCHAR(100), -- Trạng thái gốc (vd: Fully Paid, Charged Off) để PowerBI dễ đọc
     loan_status_bin INT,          -- Trạng thái ML: 1 (Nợ xấu), 0 (Trả tốt)
     CONSTRAINT FK_Fact_Borrower FOREIGN KEY (Borrower_ID) REFERENCES dw.Dim_Borrower(Borrower_ID),
     CONSTRAINT FK_Fact_LoanInfo FOREIGN KEY (Loan_Info_ID) REFERENCES dw.Dim_Loan_Info(Loan_Info_ID)
