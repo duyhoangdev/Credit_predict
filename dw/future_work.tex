@@ -1,0 +1,61 @@
+\section{Hệ thống Web App Hỗ trợ Ra quyết định (Streamlit \& FastAPI)}
+
+Trong giai đoạn cuối cùng của dự án, mô hình Machine Learning sau khi huấn luyện thành công đã được tích hợp vào một hệ thống Web Application hoàn chỉnh, đóng vai trò là một Hệ Hỗ trợ Ra Quyết định (Decision Support System - DSS) thực thụ cho các nhân viên tín dụng. Hệ thống đã được xây dựng và triển khai thực tế với kiến trúc Microservices cơ bản, bao gồm 3 thành phần chính:
+
+\begin{itemize}
+    \item \textbf{Frontend (Streamlit - Port 8501):} Giao diện người dùng được xây dựng bằng framework Streamlit, cung cấp một Dashboard tương tác trực quan, hiện đại (Dark Theme). Nhân viên tín dụng điền các thông tin thô của hồ sơ vay (số tiền, lãi suất, hạng tín dụng, v.v.) thông qua các Form thân thiện. Hệ thống tích hợp biểu đồ Gauge hiển thị trực quan mức độ rủi ro (Risk Probability).
+    \item \textbf{Backend (FastAPI - Port 8000):} Xây dựng bằng FastAPI chuẩn RESTful API. Backend tiếp nhận dữ liệu, tự động chạy qua đường ống tiền xử lý (Clipping, Encoding, Scaling) hoàn toàn giống với lúc huấn luyện, sau đó đưa vào mô hình Logistic Regression để đưa ra dự đoán.
+    \item \textbf{Database (PostgreSQL - Port 5432):} Tích hợp SQLAlchemy ORM để tự động lưu vết (logging) toàn bộ lịch sử các lượt thẩm định vào bảng \texttt{loan\_predictions}, phục vụ công tác kiểm toán và tái huấn luyện mô hình.
+\end{itemize}
+
+\subsection{Kịch bản Thực nghiệm Hệ thống (System Testing)}
+Để minh họa khả năng hoạt động của hệ thống, nhóm trình bày hai kịch bản thẩm định đối lập dựa trên dữ liệu thực tế:
+
+\subsubsection{Kịch bản 1: Phê duyệt hồ sơ rủi ro thấp}
+\begin{itemize}
+    \item \textbf{Dữ liệu đầu vào:} Số tiền vay: \$10,000 | Lãi suất: 7.5\% | Hạng tín dụng: A | Thu nhập: \$120,000 | DTI: 8\% | Trễ hạn: 0.
+    \item \textbf{Kết quả trả về:} Hệ thống hiển thị cảnh báo xanh (✅ PHÊ DUYỆT).
+    \item \textbf{Giải thích:} Với đặc trưng của một hồ sơ rất tốt (hạng A, thu nhập cao, tỷ lệ nợ thấp), hệ thống đánh giá xác suất nợ xấu chỉ ở mức rất thấp (dưới 15\%) và đưa ra quyết định an toàn cho ngân hàng.
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    % TODO: Nhập thông số Kịch bản 1 lên Web, chụp màn hình Kết quả có chữ Xanh và dán đè vào đây
+    \includegraphics[width=0.9\textwidth]{images/test_case_approved.png}
+    \caption{Kết quả xử lý Kịch bản 1: Hệ thống khuyến nghị Phê duyệt hồ sơ rủi ro thấp}
+    \label{fig:app_case1}
+\end{figure}
+
+\subsubsection{Kịch bản 2: Từ chối hồ sơ rủi ro cao}
+\begin{itemize}
+    \item \textbf{Dữ liệu đầu vào:} Số tiền vay: \$25,000 | Lãi suất: 22.0\% | Hạng tín dụng: G | Thu nhập: \$30,000 | DTI: 35\% | Trễ hạn: 2.
+    \item \textbf{Kết quả trả về:} Hệ thống hiển thị cảnh báo đỏ (🚨 TỪ CHỐI).
+    \item \textbf{Giải thích:} Khách hàng có thu nhập thấp nhưng gánh nặng nợ lớn (DTI cao), kết hợp với lãi suất vay rất cao và hạng tín dụng chạm đáy (G). Mô hình AI ngay lập tức nhận diện đây là hồ sơ độc hại với xác suất vỡ nợ rất cao (>60\%) và đề xuất từ chối.
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    % TODO: Nhập thông số Kịch bản 2 lên Web, chụp màn hình Kết quả có chữ Đỏ và dán đè vào đây
+    \includegraphics[width=0.9\textwidth]{images/test_case_rejected.png}
+    \caption{Kết quả xử lý Kịch bản 2: Hệ thống khuyến nghị Từ chối hồ sơ rủi ro cao}
+    \label{fig:app_case2}
+\end{figure}
+
+\section{Kết luận (Conclusion)}
+
+Dự án đã xây dựng thành công một \textbf{Đường ống Dữ liệu \& Trí tuệ Nhân tạo (End-to-End Data \& AI Pipeline)} hoàn chỉnh cho bài toán Phê duyệt Tín dụng. Cụ thể:
+
+\begin{enumerate}
+    \item \textbf{Data Source \& ETL:} Xuất phát từ bộ dữ liệu khổng lồ của Lending Club (hơn 2.2 triệu dòng), dữ liệu đã được trích xuất, làm sạch, và biến đổi.
+    \item \textbf{Data Warehouse:} Xây dựng thành công kho dữ liệu với mô hình Star Schema, tách bạch các chiều dữ liệu (\texttt{Dim\_Borrower}, \texttt{Dim\_Loan\_Info}) và bảng sự kiện (\texttt{Fact\_Loan}), hỗ trợ đắc lực cho công tác truy vấn và báo cáo BI.
+    \item \textbf{Machine Learning:} Ứng dụng kỹ thuật lấy mẫu (Under-sampling) để xử lý mất cân bằng, và huấn luyện thành công mô hình Logistic Regression. Mô hình tuy đơn giản nhưng mang lại tính minh bạch (Explainability) rất cao.
+    \item \textbf{Deployment:} Tích hợp toàn bộ logic vào hệ thống Web Application (Frontend \& Backend độc lập), biến những dòng code thành một sản phẩm thực tế có giá trị ứng dụng cao.
+\end{enumerate}
+
+\section{Định hướng Phát triển Tương lai (Future Work)}
+
+\subsection{Mở rộng Kiến trúc Dữ liệu thành Galaxy Schema}
+Hiện tại, kho dữ liệu đang được thiết kế theo mô hình \textbf{Star Schema} với một Fact Table duy nhất (\texttt{Fact\_Loan}). Trong tương lai, hệ thống có thể được nâng cấp lên mô hình \textbf{Galaxy Schema} bằng cách thêm các bảng \texttt{Fact\_CreditCard} hay \texttt{Fact\_Savings}. Các bảng Fact này sẽ chia sẻ chung các chiều lõi (Conformed Dimensions) như \texttt{Dim\_Borrower}. Điều này tạo ra một hệ sinh thái dữ liệu 360 độ về khách hàng, hỗ trợ ngân hàng bán chéo (Cross-selling) hiệu quả.
+
+\subsection{Tự động hóa Luồng Dữ liệu Thời gian thực (Real-time Streaming Pipeline)}
+Định hướng tương lai là chuyển dịch từ xử lý theo lô (Batch Processing) thông qua file CSV tĩnh sang \textbf{Data Pipeline thời gian thực}. Sử dụng \textbf{Apache Kafka} để bắt các sự kiện thay đổi dữ liệu (CDC) từ hệ thống giao dịch, sau đó đẩy qua Airflow/Spark để thực hiện ETL tự động và đổ vào Data Warehouse. Điều này đảm bảo hệ thống BI và AI luôn phản ánh biến động tài chính tính bằng giây.

@@ -2,10 +2,18 @@ import pandas as pd
 from sqlalchemy import create_engine
 import urllib
 import sys
+from pathlib import Path
+
 sys.stdout.reconfigure(encoding='utf-8')
-print("1. Đang đọc dữ liệu từ file loan_dw.csv...")
-# Đọc trực tiếp file loan_dw.csv vì nó đã được chuẩn bị sẵn
-df = pd.read_csv('data/raw/loan_dw.csv', low_memory=False)
+
+base_dir = Path(__file__).resolve().parent
+preferred_file = base_dir / 'data' / 'processed' / 'living_sample_100k.csv'
+fallback_file = base_dir / 'data' / 'raw' / 'loan_dw.csv'
+input_file = preferred_file if preferred_file.exists() else fallback_file
+
+print(f"1. Đang đọc dữ liệu DWH từ file {input_file.relative_to(base_dir)}...")
+# Ưu tiên dùng output ETL cho DWH/Power BI; fallback sang loan_dw.csv nếu chưa chạy notebook.
+df = pd.read_csv(input_file, low_memory=False)
 
 print(f"   -> Đã đọc xong {len(df):,} dòng dữ liệu!")
 

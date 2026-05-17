@@ -23,6 +23,10 @@ GO
 -- Chuyển bảng vừa import từ dbo sang stg (NẾU BẢNG ĐANG Ở DBO)
 IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[Loan_Raw]') AND type in (N'U'))
 BEGIN
+    IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[stg].[Loan_Raw]') AND type in (N'U'))
+    BEGIN
+        DROP TABLE stg.Loan_Raw;
+    END
     ALTER SCHEMA stg TRANSFER dbo.Loan_Raw;
 END
 GO
@@ -92,7 +96,12 @@ SELECT DISTINCT
     total_acc
 FROM stg.Loan_Raw
 WHERE loan_status != 'Current'  -- Loại bỏ nhiễu 'Current' ngay từ đầu
-  AND annual_inc > 0;           -- Loại bỏ lỗi logic (thu nhập âm hoặc bằng 0)
+  AND annual_inc > 0            -- Loại bỏ lỗi logic (thu nhập âm hoặc bằng 0)
+  AND dti >= 0
+  AND loan_amnt > 0
+  AND installment > 0
+  AND delinq_2yrs IS NOT NULL
+  AND total_acc IS NOT NULL;
 
 -- 4.2. Nạp dữ liệu vào Dim_Loan_Info
 INSERT INTO dw.Dim_Loan_Info (term, grade, verification_status)
@@ -102,7 +111,12 @@ SELECT DISTINCT
     CAST(verification_status AS NVARCHAR(50))
 FROM stg.Loan_Raw
 WHERE loan_status != 'Current'
-  AND annual_inc > 0;
+  AND annual_inc > 0
+  AND dti >= 0
+  AND loan_amnt > 0
+  AND installment > 0
+  AND delinq_2yrs IS NOT NULL
+  AND total_acc IS NOT NULL;
 
 -- 4.3. Nạp dữ liệu vào Fact_Loan (Áp dụng Transformation chuyển nhãn 0/1)
 INSERT INTO dw.Fact_Loan (Borrower_ID, Loan_Info_ID, loan_amnt, int_rate, installment, loan_status_raw, loan_status_bin)
@@ -115,8 +129,9 @@ SELECT
     r.loan_status AS loan_status_raw,
     -- LOGIC CHUYỂN ĐỔI BIẾN MỤC TIÊU (0: Tốt, 1: Xấu)
     CASE 
-        WHEN r.loan_status = 'Fully Paid' THEN 0
-        WHEN r.loan_status IN ('Charged Off', 'Default') OR r.loan_status LIKE '%Late%' THEN 1
+        WHEN r.loan_status IN ('Fully Paid', 'Does not meet the credit policy. Status:Fully Paid') THEN 0
+        WHEN r.loan_status IN ('Charged Off', 'Default', 'Does not meet the credit policy. Status:Charged Off')
+             OR r.loan_status LIKE '%Late%' THEN 1
         ELSE NULL
     END AS loan_status_bin
 FROM stg.Loan_Raw r
@@ -124,12 +139,66 @@ JOIN dw.Dim_Borrower b
     ON ISNULL(CAST(r.emp_length AS NVARCHAR(50)), 'Unknown') = b.emp_length 
     AND CAST(r.home_ownership AS NVARCHAR(50)) = b.home_ownership 
     AND r.annual_inc = b.annual_inc
+    AND r.dti = b.dti
+    AND r.delinq_2yrs = b.delinq_2yrs
+    AND r.total_acc = b.total_acc
 JOIN dw.Dim_Loan_Info l 
     ON CAST(r.term AS NVARCHAR(50)) = l.term 
     AND CAST(r.grade AS NVARCHAR(50)) = l.grade 
     AND CAST(r.verification_status AS NVARCHAR(50)) = l.verification_status
 WHERE r.loan_status != 'Current'
-  AND r.annual_inc > 0;
+  AND r.annual_inc > 0
+  AND r.dti >= 0
+  AND r.loan_amnt > 0
+  AND r.installment > 0
+  AND r.delinq_2yrs IS NOT NULL
+  AND r.total_acc IS NOT NULL;
 GO
 
 PRINT N'✅ Đã xây dựng xong Data Warehouse + Tích hợp thành công Data Binning & Target Transformation!';
+
+-- =========================================================
+-- 5. VIEW PHẲNG PHỤC VỤ POWER BI
+-- =========================================================
+CREATE OR ALTER VIEW dw.vw_Loan_Dashboard AS
+SELECT
+    f.Fact_ID,
+    f.loan_amnt,
+    f.int_rate,
+    f.installment,
+    f.loan_status_raw,
+    f.loan_status_bin,
+    b.emp_length,
+    b.home_ownership,
+    b.annual_inc,
+    b.income_bin,
+    b.dti,
+    b.delinq_2yrs,
+    b.total_acc,
+    l.term,
+    l.grade,
+    l.verification_status
+FROM dw.Fact_Loan f
+JOIN dw.Dim_Borrower b ON f.Borrower_ID = b.Borrower_ID
+JOIN dw.Dim_Loan_Info l ON f.Loan_Info_ID = l.Loan_Info_ID;
+
+-- =========================================================
+-- 6. KIỂM TRA SỐ DÒNG SAU KHI LOAD DATA WAREHOUSE
+-- =========================================================
+SELECT 'stg.Loan_Raw' AS table_name, COUNT(*) AS row_count FROM stg.Loan_Raw
+UNION ALL
+SELECT 'dw.Dim_Borrower', COUNT(*) FROM dw.Dim_Borrower
+UNION ALL
+SELECT 'dw.Dim_Loan_Info', COUNT(*) FROM dw.Dim_Loan_Info
+UNION ALL
+SELECT 'dw.Fact_Loan', COUNT(*) FROM dw.Fact_Loan
+UNION ALL
+SELECT 'dw.vw_Loan_Dashboard', COUNT(*) FROM dw.vw_Loan_Dashboard;
+
+SELECT 
+    loan_status_raw,
+    loan_status_bin,
+    COUNT(*) AS row_count
+FROM dw.Fact_Loan
+GROUP BY loan_status_raw, loan_status_bin
+ORDER BY row_count DESC;

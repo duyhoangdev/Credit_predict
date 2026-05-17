@@ -1,12 +1,5 @@
 [
-  "loan_amnt",
-  "int_rate",
   "grade",
-  "delinq_2yrs",
-  "total_acc",
-  "term_numeric",
-  "annual_inc_clipped",
-  "dti_clipped",
   "home_ownership_MORTGAGE",
   "home_ownership_OTHER",
   "home_ownership_OWN",
@@ -23,5 +16,12 @@
   "emp_length_8 years",
   "emp_length_9 years",
   "emp_length_< 1 year",
-  "emp_length_Unknown"
+  "emp_length_Unknown",
+  "loan_amnt",
+  "int_rate",
+  "delinq_2yrs",
+  "total_acc",
+  "term_numeric",
+  "annual_inc_clipped",
+  "dti_clipped"
 ]

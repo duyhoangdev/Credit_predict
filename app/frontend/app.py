@@ -149,7 +149,7 @@ with st.sidebar:
     st.markdown("---")
     
     st.markdown("### 🤖 Mô hình AI")
-    st.info("**Logistic Regression**\n\nROC-AUC: 0.6837\n\nRecall (Nợ xấu): 61%")
+    st.info("**Logistic Regression**\n\nROC-AUC: 0.7123\n\nRecall (Nợ xấu): 61%")
     
     st.markdown("### 📊 Thông số hệ thống")
     st.markdown("""

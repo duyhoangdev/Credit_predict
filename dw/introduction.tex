@@ -1,0 +1,35 @@
+\section{Giới thiệu}
+
+\subsection{Bối cảnh và động lực}
+Trong lĩnh vực tài chính - ngân hàng, bài toán phê duyệt khoản vay luôn đi kèm với mâu thuẫn cốt lõi: tổ chức cần mở rộng tín dụng để tăng trưởng doanh thu, nhưng đồng thời phải kiểm soát chặt chẽ rủi ro nợ xấu để bảo toàn vốn. Nếu quy trình thẩm định chỉ dựa vào các thao tác thủ công, tổ chức sẽ dễ đối mặt với các vấn đề như: thời gian xử lý hồ sơ kéo dài, tiêu chí đánh giá thiếu tính nhất quán, và khó mở rộng quy mô khi khối lượng dữ liệu tăng nhanh.
+
+Dưới góc độ của một kỹ sư dữ liệu (Data Engineer), việc xây dựng một quy trình phân tích dữ liệu có cấu trúc — từ bước trích xuất, chuyển đổi (ETL) đến xây dựng mô hình dự đoán — là vô cùng thiết yếu. Điều này không chỉ giúp chuẩn hóa việc ra quyết định tín dụng, giảm thiểu sự phụ thuộc vào cảm tính của con người, mà còn tăng cường tính minh bạch và khả năng giải thích của kết quả phê duyệt.
+
+\subsection{Vấn đề nghiên cứu và mục tiêu}
+Đề tài này tập trung giải quyết bài toán \textbf{dự đoán rủi ro nợ xấu} của các hồ sơ vay tiêu dùng. Biến mục tiêu (target variable) được xác định là \texttt{loan\_status} (phân loại hồ sơ thành các trạng thái như \textit{Fully Paid} - Đã trả đủ và \textit{Charged Off} - Xóa nợ/Nợ xấu).
+
+Mục tiêu chính của đề tài bao gồm:
+\begin{itemize}
+    \item Thiết kế và triển khai quy trình ETL nhằm làm sạch, chuẩn hóa và kiểm định chất lượng dữ liệu trước khi đưa vào kho lưu trữ.
+    \item Tổ chức lưu trữ dữ liệu theo tư duy Data Warehouse (Lược đồ Ngôi sao - Star Schema) để tạo nền tảng vững chắc cho công tác phân tích và trực quan hóa (Business Intelligence - BI).
+    \item Xây dựng mô hình học máy Machine Learning) để phân lớp và ước lượng xác suất vỡ nợ, từ đó làm cơ sở khoa học để đánh giá rủi ro tín dụng.
+    \item Phát triển và triển khai Hệ Hỗ trợ Ra Quyết định (DSS) trên nền tảng Web: Tích hợp mô hình AI vào ứng dụng web (sử dụng Streamlit) nhằm cung cấp giao diện tương tác trực quan, giúp các chuyên viên tín dụng dễ dàng nhập thông tin hồ sơ và nhận khuyến nghị phê duyệt khoản vay tự động theo thời gian thực.
+\end{itemize}
+
+\subsection{Ý nghĩa thực tiễn}
+Trong thực tế vận hành tín dụng, sai lầm gây thiệt hại nghiêm trọng nhất không phải là từ chối nhầm một khách hàng tốt, mà là phê duyệt nhầm một khách hàng rủi ro cao (dự đoán là trả nợ tốt nhưng thực tế lại vỡ nợ). Do đó, kết quả của đề tài mang ý nghĩa trực tiếp đối với công tác quản trị rủi ro, giúp tổ chức phân bổ hạn mức tín dụng hợp lý và tối ưu hóa lợi nhuận sau khi đã điều chỉnh rủi ro (Risk-Adjusted Return).
+
+Bên cạnh đó, đề tài còn minh họa rõ nét chuỗi giá trị của luồng dữ liệu : từ \textit{Dữ liệu thô} $\rightarrow$ \textit{Xử lý ETL} $\rightarrow$ \textit{Kho dữ liệu (Data Warehouse)} $\rightarrow$ \textit{Phân tích và Dự báo (Data Mining/ML)}.
+
+\subsection{Nguồn gốc và mô tả bộ dữ liệu}
+% Lưu ý: Bạn cần khai báo thư viện \usepackage{hyperref} ở đầu file .tex để dùng lệnh \url
+Bộ dữ liệu sử dụng trong đề tài có tên là Lending Club Loan Data. Lending Club là một trong những công ty cho vay ngang hàng (Peer-to-Peer Lending) lớn nhất tại Mỹ, hoạt động với mô hình kết nối trực tiếp nhà đầu tư có vốn nhàn rỗi và người có nhu cầu vay mượn. Lợi ích của mô hình này là người vay thường nhận được mức lãi suất thấp hơn, trong khi nhà đầu tư thu về lợi nhuận cao hơn.
+
+
+\subsection{Kỹ thuật Data Mining được ứng dụng}
+Trong phạm vi của đề tài, các kỹ thuật khai phá dữ liệu nền tảng, có khả năng giải thích tốt và phù hợp với đặc thù dữ liệu tài chính được ưu tiên sử dụng:
+\begin{itemize}
+    \item \textbf{Tiền xử lý và ETL:} Xử lý dữ liệu khuyết thiếu (Missing values), chuẩn hóa định dạng (Parsing dates/strings), mã hóa biến phân loại (One-Hot/Label Encoding), và co giãn đặc trưng (Feature Scaling).
+    \item \textbf{Mô hình phân lớp (Classification):} Sử dụng Logistic Regression Pipeline làm mô hình chính vì ROC-AUC tốt hơn nhẹ, Recall lớp nợ xấu ổn và dễ giải thích trong bối cảnh tín dụng. Random Forest được huấn luyện và tinh chỉnh bằng \texttt{RandomizedSearchCV} để làm mô hình so sánh.
+    \item \textbf{Đánh giá mô hình:} Thay vì chỉ dùng độ chính xác (Accuracy), đề tài chú trọng vào các độ đo như Precision, Recall, F1-Score và ROC-AUC để tối ưu hóa khả năng nhận diện lớp nợ xấu (Charged Off), bám sát mục tiêu giảm thiểu rủi ro vận hành tín dụng.
+\end{itemize}

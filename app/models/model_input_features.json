@@ -1,0 +1,13 @@
+[
+  "loan_amnt",
+  "int_rate",
+  "grade",
+  "emp_length",
+  "home_ownership",
+  "verification_status",
+  "delinq_2yrs",
+  "total_acc",
+  "term_numeric",
+  "annual_inc_clipped",
+  "dti_clipped"
+]

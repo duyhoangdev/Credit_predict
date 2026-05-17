@@ -1,0 +1,154 @@
+% Reorganize by me 
+% Credit: CSE Faculty
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{template}
+%\documentclass[12pt]{article}
+\usepackage{float}
+\usepackage[utf8]{vietnam}
+\usepackage{parskip}
+%\usepackage{indentfirst}
+\usepackage{comment}
+\usepackage[table,xcdraw]{xcolor}
+\usepackage{a4wide,amssymb,epsfig,latexsym,multicol,array,hhline,fancyhdr}
+\usepackage[letterpaper,top=2cm,bottom=3cm,left=2.5cm,right=2.5cm,marginparwidth=2cm]{geometry}
+% \usepackage{vntex}
+\usepackage{amsmath}
+\usepackage{lastpage}
+\usepackage[lined,boxed,commentsnumbered]{algorithm2e}
+\usepackage{enumerate}
+\usepackage{color}
+\definecolor{LightGray}{gray}{0.9}
+
+\usepackage[framemethod=TikZ]{mdframed}
+\usepackage{graphicx}							% Standard graphics package
+\usepackage{array}
+\usepackage{tabularx, caption}
+\usepackage{multirow}
+\usepackage{multicol}
+\usepackage{rotating}
+\usepackage{graphics}
+\usepackage{setspace}
+\usepackage{epsfig}
+\usepackage{algorithm2e}
+\usepackage{url}
+\renewcommand{\algorithmcfname}{Pseudocode} % Change "Algorithm" to "YourText"
+\usepackage{tikz}
+\usetikzlibrary{arrows,decorations.pathmorphing,backgrounds,positioning,fit,petri}
+\usepackage{hyperref}
+\hypersetup{urlcolor=blue,linkcolor=black,citecolor=black,colorlinks=true} 
+%\usepackage{pstcol} 								% PSTricks with the standard color package
+
+%-----Automata----------
+\usetikzlibrary{automata}
+\usetikzlibrary{positioning} 
+\usetikzlibrary{arrows} 
+\tikzset{node distance=2.5cm, % Minimum distance between two nodes. Change if necessary.
+    every state/.style={ % Sets the properties for each state
+    semithick,
+    fill=gray!10},
+    initial text={}, % No label on start arrow
+    double distance=2pt, % Adjust appearance of accept states
+    every edge/.style={ % Sets the properties for each transition
+    draw,
+    ->,>=stealth', % Makes edges directed with bold arrowheads
+    auto,
+    semithick}
+}
+\let\epsilon\varepsilon
+%------------------------------------
+
+% Hoare triples typesetting
+%------------------------
+\newcommand\Hoaretriple[3]{%
+  \llparenthesis\,#1\,\rrparenthesis
+  \mathrel{#2}\nolinebreak 
+  \llparenthesis\,#3\,\rrparenthesis
+}
+
+\newtheorem{definition}{{\bf Định nghĩa}}
+\newtheorem{property}{{\bf Property}}
+\newtheorem{proposition}{{\bf Proposition}}
+\newtheorem{corollary}[proposition]{{\bf Corollary}}
+\newtheorem{lemma}[proposition]{{\bf Lemma}}
+\newcommand{\E}{\mathbb{E}}
+
+\AtBeginDocument{\renewcommand*\contentsname{Contents}}
+\AtBeginDocument{\renewcommand*\refname{References}}
+%\usepackage{fancyhdr}
+\setlength{\headheight}{40pt}
+\pagestyle{fancy}
+\fancyhead{} % clear all header fields
+\fancyhead[L]{%
+    % Giảm khoảng cách giãn dòng cho toàn bộ header
+    \linespread{0.8}\selectfont 
+    \begin{tabular}{@{}l@{\hspace{0.4em}}l@{}} % Sử dụng @{} để loại bỏ khoảng trống đệm mặc định
+        \raisebox{-.7\height}{% Căn chỉnh logo theo chiều dọc
+            \includegraphics[width=9mm, height=9mm]{images/hcmut.png}
+        } &
+        % Mini-tabular lồng ghép cho văn bản
+        \begin{tabular}[t]{l} % [t] căn chỉnh theo đỉnh
+            \textbf{\ttfamily Trường Đại học Bách Khoa - Đại học Quốc gia Thành phố Hồ Chí Minh}\\
+            \textbf{\ttfamily Khoa Khoa học và Kỹ thuật máy tính}
+        \end{tabular} 	
+    \end{tabular}%
+}
+\fancyhead[R]{
+	\begin{tabular}{l}
+		\tiny \bf \\
+		\tiny \bf 
+	\end{tabular}  }
+\fancyfoot{} % clear all footer fields
+\fancyfoot[L]{\scriptsize \ttfamily Bài tập lớn môn Học máy - Học kì 251}
+\fancyfoot[R]{\scriptsize \ttfamily Page {\thepage}/\pageref{LastPage}}
+\renewcommand{\headrulewidth}{0.3pt}
+\renewcommand{\footrulewidth}{0.3pt}
+
+
+%%%
+\setcounter{secnumdepth}{4}
+\setcounter{tocdepth}{4}
+\makeatletter
+\newcounter {subsubsubsection}[subsubsection]
+\renewcommand\thesubsubsubsection{\thesubsubsection .\@alph\c@subsubsubsection}
+\newcommand\subsubsubsection{\@startsection{subsubsubsection}{4}{\z@}%
+                                     {-3.25ex\@plus -1ex \@minus -.2ex}%
+                                     {1.5ex \@plus .2ex}%
+                                     {\normalfont\normalsize\bfseries}}
+\newcommand*\l@subsubsubsection{\@dottedtocline{3}{6.0em}{4.1em}}
+\newcommand*{\subsubsubsectionmark}[1]{}
+\makeatother
+
+\hypersetup{bookmarksdepth=4}
+
+
+% ----- CẤU HÌNH HIỂN THỊ CODE PYTHON -----
+\usepackage{listings}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\definecolor{light-gray}{gray}{0.95}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    escapeinside={(*@}{@*)},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+\lstset{style=mystyle}
+% -----------------------------------------
